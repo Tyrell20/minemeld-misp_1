@@ -274,6 +274,81 @@ class Miner(BasePollerFT):
             if self.indicator_types is not None:
                 result = [[ti, tiv] for ti, tiv in result if tiv['type'] in self.indicator_types]
 
+
+        # add objects as well
+
+        a_object = event.get('Object', [])
+
+        for o in a_object:
+            oattributes = o.get('Attribute', [])
+            for a in oattributes:
+                if self.honour_ids_flag:
+                    to_ids = a.get('to_ids', False)
+                    if not to_ids:
+                        continue
+
+                indicator = a.get('value', None)
+                if indicator is None:
+                    LOG.error('{} - attribute with no value: {!r}'.format(self.name, a))
+                    continue
+
+                iv = {}
+
+                # Populate iv with the attributes from the event.
+                for aname, aexpr in self.attribute_attributes.iteritems():
+                    try:
+                        eresult = aexpr.search(a)
+                    except:
+                        continue
+
+                    if eresult is None:
+                        continue
+
+                    iv['{}_attribute_{}'.format(self.prefix, aname)] = eresult
+
+                iv.update(base_value)
+
+                itype = a.get('type', None)
+                if itype == 'ip-src':
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'inbound'
+                elif itype == 'ip-src|port':
+                    indicator, _ = indicator.split('|', 1)
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'inbound'
+                elif itype == 'ip-dst':
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'outbound'
+                elif itype == 'ip-dst|port':
+                    indicator, _ = indicator.split('|', 1)
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'outbound'
+                elif itype[:9] == 'filename|':
+                    indicator, indicator2 = indicator.split('|', 1)
+                    iv['type'] = 'file.name'
+
+                    # If we know the 2nd indicator type, clone the iv as it's the same event, and append it it to results
+                    itype2 = _MISP_TO_MINEMELD.get(itype[9:], None)
+                    if itype2 is not None:
+                        iv2 = copy.deepcopy(iv)  # Copy IV since it's the same event, just different type
+                        iv2['type'] = itype2
+                        result.append([indicator2, iv2])  # Append our second indicator
+
+                else:
+                    iv['type'] = _MISP_TO_MINEMELD.get(itype, None)
+
+                if iv['type'] is None:
+                    LOG.error('{} - Unhandled indicator type: {!r}'.format(self.name, a))
+                    continue
+
+                result.append([indicator, iv])
+
+                if self.indicator_types is not None:
+                    result = [[ti, tiv] for ti, tiv in result if tiv['type'] in self.indicator_types]
+
+        # end objects
+
+
         return result
 
     def hup(self, source=None):
