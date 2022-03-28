@@ -1,20 +1,27 @@
 {
-    "version": "2.5.0b1",
-    "name": "minemeld-misp",
-    "author": "Palo Alto Networks",
-    "author_email": "techbizdev@paloaltonetworks.com",
-    "description": "MineMeld extension for MISP",
+    "version": "1.0",
+    "name": "misp-taxii",
+    "author": "InfoGuard AG",
+    "author_email": "",
+    "description": "MineMeld extension for MISP and TAXII",
     "entry_points": {
         "minemeld_webui": {
-            "mmmispWebui": "mmmisp:webui_blueprint"
+            "mmmispWebui": "mmmisp:webui_blueprint",
+            "mmmisptaxiiWebui": "mmmisp:webui_taxii_blueprint"
         },
         "minemeld_nodes": {
-            "mmmisp.Miner": "mmmisp.node:Miner"
+            "mmmisp.Miner": "mmmisp.node:Miner",
+            "mmmisp.taxii.DataFeed": "mmmisp.taxii:DataFeed"
         },
         "minemeld_prototypes": {
             "mmmisp.prototypes": "mmmisp:prototypes"
+        },
+        "minemeld_api": {
+            "mmmisp.taxiiserver.taxiidiscovery": "mmmisp.taxiiserver.taxiidiscovery:get_blueprint",
+            "mmmisp.taxiiserver.taxiicollmgmt": "mmmisp.taxiiserver.taxiicollmgmt:get_blueprint",
+            "mmmisp.taxiiserver.taxiipoll": "mmmisp.taxiiserver.taxiipoll:get_blueprint"
         }
 
     },
-    "manifest_version": 0
+    "manifest_version": 1
 }

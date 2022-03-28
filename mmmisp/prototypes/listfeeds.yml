@@ -1,0 +1,316 @@
+url:
+description: >
+  List feed output nodes for MineMeld. If used together with the MISP miner node, it supports the following MISP-types:
+
+  URL, domain, domain.ip, hostname, hostname.port, md5, sha1, sha256, sha512, ssdeep, mutex, filename,
+  filename|md5, filename|sha1, filename|sha256, filename|sha512, filename|ssdeep, email-src, email-dst,
+  named pipe, port, windows-service-displayname, windwos-service-name, regkey, regkey|value
+
+prototypes:
+
+    listFeedAll:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - red
+            - amber
+            - green
+            - white
+            - list
+        description: >
+            List feed for all indicators with share_level red, amber, green and white.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept red
+                    conditions:
+                        - share_level == 'red'
+                    actions:
+                        - accept
+                -   name: accept amber
+                    conditions:
+                        - share_level == 'amber'
+                    actions:
+                        - accept
+                -   name: accept green
+                    conditions:
+                        - share_level == 'green'
+                    actions:
+                        - accept
+                -   name: accept white
+                    conditions:
+                        - share_level == 'white'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedAmber+:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - amber
+            - green
+            - white
+            - list
+        description: >
+            List feed for all indicators with share_level amber, green and white.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept amber
+                    conditions:
+                        - share_level == 'amber'
+                    actions:
+                        - accept
+                -   name: accept green
+                    conditions:
+                        - share_level == 'green'
+                    actions:
+                        - accept
+                -   name: accept white
+                    conditions:
+                        - share_level == 'white'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedAmber:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - amber
+            - list
+        description: >
+            List feed for all indicators with share_level amber.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept amber
+                    conditions:
+                        - share_level == 'amber'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedGreen+:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - green
+            - white
+            - list
+        description: >
+            List feed for all indicators with share_level green and white.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept green
+                    conditions:
+                        - share_level == 'green'
+                    actions:
+                        - accept
+                -   name: accept white
+                    conditions:
+                        - share_level == 'white'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedGreen:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - green
+            - list
+        description: >
+            List feed for all indicators with share_level green.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept green
+                    conditions:
+                        - share_level == 'green'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedWhite:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - any
+        tags:
+            - white
+            - list
+        description: >
+            List feed for all indicators with share_level white.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept white
+                    conditions:
+                        - share_level == 'white'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedURLIP:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - URL
+            - IPv4
+            - IPv6
+        tags:
+            - URL
+            - IP
+            - list
+        description: >
+            List feed for indicators with type URL or IP and all share levels.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept URL
+                    conditions:
+                        - type == 'URL'
+                    actions:
+                        - accept
+                -   name: accept IPv4
+                    conditions:
+                        - type == 'IPv4'
+                    actions:
+                        - accept
+                -   name: accept IPv6
+                    conditions:
+                        - type == 'IPv6'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedURL:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - URL
+        tags:
+            - URL
+            - list
+        description: >
+            List feed for indicators with type URL and all share levels.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept URL
+                    conditions:
+                        - type == 'URL'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop
+
+    listFeedIP:
+        author: InfoGuard AG
+        development_status: STABLE
+        node_type: output
+        class: minemeld.ft.redis.RedisSet
+        indicator_types:
+            - IPv4
+            - IPv6
+        tags:
+            - IP
+            - list
+        description: >
+            List feed for indicators with type IP and all share levels.
+        config:
+            infilters:
+                -   name: accept withdraws
+                    conditions:
+                        - __method == 'withdraw'
+                    actions:
+                        - accept
+                -   name: accept IPv4
+                    conditions:
+                        - type == 'IPv4'
+                    actions:
+                        - accept
+                -   name: accept IPv6
+                    conditions:
+                        - type == 'IPv6'
+                    actions:
+                        - accept
+                -   name: drop all
+                    actions:
+                        - drop

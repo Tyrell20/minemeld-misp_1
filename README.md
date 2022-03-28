@@ -1,78 +1,50 @@
-# minemeld-misp
-MineMeld nodes for [MISP](http://www.misp-project.org/)
+# ThreatIntelPFExtensions
+Forked version of [minemeld-misp](https://github.com/PaloAltoNetworks/minemeld-misp)
+
+Contains extensions for [Minemeld](https://www.paloaltonetworks.com/products/secure-the-network/subscriptions/minemeld) used for the project Threat Intel Platform:
+* Dedicated miner nodes to fetch IoCs over the [MISP](http://www.misp-project.org/) API.
+* Additional processor nodes that allow for filtering of tlp-tags.
+* Output nodes providing the IoCs in form of a feed, either as a list or in the STIX/TAXII format.
+* Support for additional types of IoCs
+
+## Code structure
+``minemeld.json`` - Metadata including information about the setup of the extension
+
+``/mmmisp/prototypes`` - Configuration files defining prototypes
+
+``/mmmisp/taxiiserver`` - Implementation of TAXII-server including its API
+
+``/mmmisp/taxiiwebui`` - Implementation of Web-UI for prototypes of class "mmmisp.taxii.DataFeed"
+
+``/mmmisp/webui`` - Implementation of Web-UI for prototypes of class "mmmisp.Miner"
+
+``/mmmisp/node.py`` - Implementation of miner base class "mmmisp.Miner"
+
+``/mmmisp/taxii.py`` - Implementation of output base class "mmmisp.taxi.DataFeed"
 
 ## Requirements
+Written in python 2.7 since core system does not support python 3
 
-MineMeld >= 0.9.37b1
+minemeld-core>=0.9.37b1\
+pymisp==2.4.96\
+pytz==2015.4\
+lz4==2.2.1\
+lxml==4.1.0\
+PyYAML==3.11\
+redis==2.10.5\
+gevent==1.0.2\
+netaddr==0.7.18\
+Werkzeug==0.12.2\
+six==1.11.0\
+libtaxii==1.1.107\
+stix==1.1.1.8\
+stix-edh==1.0.0\
+cybox==2.1.0.17\
 
-## Installation
 
-- in SYSTEM > EXTENSIONS install the extension using *git* button (https://github.com/PaloAltoNetworks/minemeld-misp.git)
-- (temporary workaround for a bug in MineMeld) open a shell on MineMeld and restart the API daemon:
+## Documentation
 
-``$ sudo -u minemeld mm-supervisorctl restart minemeld-web``
+Upload the provided wheel (misp_taxii-1.0-py2-none-any.whl) in Minemeld as an extension and then install it.
 
-- refresh your browser
+For further documentation and setup instruction refer to the code or the [internal documentation](https://infoboard.ig.loc/display/SSD/TIP+-+Documentation)
 
-## Miner
-
-To use the Miner you should create a new prototype based on *misp.anyEvent* prototype and add the *url* parameter.
-
-After COMMIT you will be able to specify the authentication key directly from the WebUI.
-
-### Prototype parameters
-
-```yaml
-# source name, to identify the origin of the indicators inside MineMeld
-source_name: misp.test
-# URL of MISP
-url: https://misp.example.com
-# filters for MISP query
-# default: none
-# this one check for published events with tag tlp:white
-# you can specify a time window of the last N days using datefrom: <N>d
-# check the search_index API in PyMISP for available filter parameters
-filters:
-  published: 1
-  tag: 'tlp:white'
-  # datefrom: 180d
-# select specific inidicator types, default: null (any)
-# indicator_types: ['URL', 'IPv4', 'IPv6']
-indicator_types: null
-# honour IDS flag, if true only events with IDS set will be exported
-honour_ids_flag: true
-# a dictionary of event attributes to be extracted, the value
-# of each in key in the dictionary is a JMESPATH expression
-# default:
-# event_attributes:
-#   info: info
-#   org: Org
-#   orgc: Orgc
-#   threat_level_id: threat_level_id
-#   uuid: uuid
-#   tags: Tag[*].name
-# a dictionary of attribute attributes to be extracted, the value
-# of each in key in the dictionary is a JMESPATH expression
-# default:
-# attribute_attributes:
-#   uuid: info
-#   category: Org
-#   comment: Orgc
-# prefix to be applied to indicator attributes, default: misp
-# prefix: misp
-# verify remote certificate, default true
-verify_cert: true
-# require a client certificate, default false
-client_cert_required: false
-# age out of indicators
-age_out:
-  sudden_death: true
-  default: null
-# flag indicators with share level white, if not specified
-# by tag
-attributes:
-  confidence: 70
-  # if not specified in the event, default is white for
-  # this prototype
-  share_leve: white
-```

@@ -33,8 +33,8 @@ setup(
     packages=find_packages(),
     provides=find_packages(),
     install_requires=_requirements,
-    package_data = {
-        '': ['prototypes/*.yml']
+    package_data={
+        '': ['prototypes/*.yml', 'webui/*', 'taxiiwebui/*'],
     },
     entry_points=_entry_points
 )
