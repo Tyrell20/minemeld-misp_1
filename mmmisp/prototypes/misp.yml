@@ -22,7 +22,7 @@ prototypes:
       - misp
       - white
     description: >
-      Miner for MISP. This will extract all attributes of type URL and IP  with tlp:white tag.
+      PhKo: Miner for MISP. This will extract all attributes of type URL and IP  with tlp:white tag.
     config:
       source_name: InfoGuard.misp.white
       filters:
@@ -475,16 +475,16 @@ prototypes:
       - amber
       - block
     description: >
-      Miner for MISP. This will extract all attributes of type URL and IP with tlp:amber and block tag.
+      Miner for MISP. This will extract all attributes of type URL and IP with event tlp:amber and attribute block tag.
     config:
       source_name: InfoGuard.misp.amber
       filters:
         # tags on event
         # separate multiple tags with ',' and exclude tags by prepending '!'
-        event_tags:
+        event_tags: 'tlp:amber'
         # tags on attribute
         # separate multiple tags with ',' and exclude tags by prepending '!'
-        attribute_tags: 'tlp:amber, block'
+        attribute_tags: 'block'
         # Fetches all events not older than 100 days.
         datefrom: 100d
         # Fetches only published events
@@ -724,10 +724,10 @@ prototypes:
       filters:
         # tags on event
         # separate multiple tags with ',' and exclude tags by prepending '!'
-        event_tags:
+        event_tags: 'tlp:amber'
         # tags on attribute
         # separate multiple tags with ',' and exclude tags by prepending '!'
-        attribute_tags: 'tlp:amber, block'
+        attribute_tags: 'block'
         # Fetches all events not older than 100 days.
         datefrom: 100d
         # Fetches only published events
