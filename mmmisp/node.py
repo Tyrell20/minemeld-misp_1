@@ -244,6 +244,7 @@ class Miner(BasePollerFT):
         :param event: MISP-event returned by API
         :return: list containing of attributes (=IoCs)
         """
+        LOG.info('Process_item started. V0.1')
         event = event.get('Event', None)
         if event is None:
             return []
@@ -365,6 +366,127 @@ class Miner(BasePollerFT):
 
             if self.indicator_types is not None:
                 result = [[ti, tiv] for ti, tiv in result if tiv['type'] in self.indicator_types]
+
+        # add objects as well
+
+        a_object = event.get('Object', [])
+        for o in a_object:
+            LOG.info('Object Schleife entered X')
+            # Iterate over all attributes
+            oattributes = o.get('Attribute', [])
+            for oa in oattributes:
+                LOG.info('Attributes Schleife entered')
+                LOG.info('{} - New Object attribute: {!r}'.format(self.name, oa))
+                # check if timestamp is older than "datefrom" filter
+                if self.filters is not None and 'datefrom' in self.filters:
+                    last_edited = int(oa.get('timestamp', None))
+                    if limit > last_edited:
+                        LOG.info("Object Entry too old - discarded")
+                        continue
+                # Get tlp from attribute and set it as the share level
+                tags = oa.get('Tag', [])
+                attribute_tags = []
+                for t in tags:
+                    tname = t.get('name', None)
+                    LOG.info('Object Found tag ' + tname)
+                    if tname is None:
+                        LOG.info('tname is none')
+                        continue
+                    attribute_tags.append(tname)
+
+                    if tname.startswith('tlp:'):
+                        filter_tag = tname
+                        base_value['share_level'] = tname[4:]
+
+                drop = False
+                # Check if the attributes tag matches the given filters,
+                if 'attribute_tags' in self.filters:
+                    tags = [x.strip() for x in self.filters['attribute_tags'].split(",")]
+                    LOG.info('Object Attribute tags: ' + str(attribute_tags))
+                    for tag in tags:
+                        if tag.startswith('!'):
+                            if tag[1:] in attribute_tags:
+                                drop = True
+                        else:
+                            if tag not in attribute_tags:
+                                LOG.info('Object Not found: ' + tag)
+                                drop = True
+
+                # If attribute does not match the filter, drop it
+                if drop:
+                    LOG.info('drop')
+                    continue
+
+                if self.honour_ids_flag:
+                    to_ids = oa.get('to_ids', False)
+                    LOG.info('to-ids')
+                    if not to_ids:
+                        LOG.info('not to_ids')
+                        continue
+
+                indicator = oa.get('value', None)
+                if indicator is None:
+                    LOG.error('{} - attribute with no value: {!r}'.format(self.name, oa))
+                    continue
+
+                iv = {}
+
+                # Populate iv with the attributes from the event.
+                for aname, aexpr in self.attribute_attributes.iteritems():
+                    try:
+                        eresult = aexpr.search(oa)
+                        LOG.info('eresult try')
+                    except:
+                        continue
+
+                    if eresult is None:
+                        LOG.info('eresult is none')
+                        continue
+
+                    iv['{}_attribute_{}'.format(self.prefix, aname)] = eresult
+
+                iv.update(base_value)
+                LOG.info('av update with base-value')
+                # Convert MISP type to minemeld type
+                itype = oa.get('type', None)
+                if itype == 'ip-src':
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'inbound'
+                    LOG.info('itype = ip-src')
+                elif itype == 'ip-src|port':
+                    iv['type'] = self._detect_ip_version(indicator.split('|')[0]) + '.port'
+                    iv['direction'] = 'inbound'
+                    LOG.info('itype = ip-src,port')
+                elif itype == 'ip-dst':
+                    iv['type'] = self._detect_ip_version(indicator)
+                    iv['direction'] = 'outbound'
+                    LOG.info('itype = ip-dst')
+                elif itype == 'ip-dst|port':
+                    iv['type'] = self._detect_ip_version(indicator.split('|')[0]) + '.port'
+                    iv['direction'] = 'outbound'
+                    LOG.info('itype = ip-dst,port')
+                elif itype == 'domain|ip':
+                    iv['type'] = 'domain.' + self._detect_ip_version(indicator.split('|')[1])
+                    LOG.info('itype = domain,ip')
+                else:
+                    iv['type'] = _MISP_TO_MINEMELD.get(itype, None)
+                    LOG.info('itype else')
+
+                if iv['type'] is None:
+                    LOG.error('{} - Unhandled indicator type: {!r}'.format(self.name, oa))
+                    continue
+                # LOG.info('Result vor Append: ' + result)
+                # LOG.info('indicator: ' + indicator)
+                # LOG.info('iv: ' + iv)
+                result.append([indicator, iv])
+                # LOG.info('Result nach Append: ' + result)
+                LOG.info('Object Added')
+
+                if self.indicator_types is not None:
+                    result = [[ti, tiv] for ti, tiv in result if tiv['type'] in self.indicator_types]
+
+        # end objects
+
 
         return result
 
